@@ -14,6 +14,8 @@ x.x.x Release notes (yyyy-MM-dd)
 * Add `SyncPermissionOffer` and `SyncPermissionOfferResponse` classes to allow
   creating and accepting permission change events to synchronized Realms between
   different users.
+* Add change notifications for individual objects with an API similar to that
+  of collection notifications.
 
 ### Bugfixes
 

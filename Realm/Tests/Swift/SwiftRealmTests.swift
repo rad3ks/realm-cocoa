@@ -354,12 +354,12 @@ class SwiftRealmTests: RLMTestCase {
     func testUpdatingSortedArrayAfterBackgroundUpdate() {
         let realm = realmWithTestPath()
         let objs = SwiftIntObject.allObjectsInRealm(realm)
-        let objects = SwiftIntObject.allObjectsInRealm(realm).sortedResultsUsingProperty("intCol", ascending: true)
+        let objects = SwiftIntObject.allObjectsInRealm(realm).sortedResultsUsingKeyPath("intCol", ascending: true)
         let updateComplete = expectationWithDescription("background update complete")
 
         let token = realm.addNotificationBlock() { (_, _) in
             XCTAssertEqual(objs.count, UInt(2))
-            XCTAssertEqual(objs.sortedResultsUsingProperty("intCol", ascending: true).count, UInt(2))
+            XCTAssertEqual(objs.sortedResultsUsingKeyPath("intCol", ascending: true).count, UInt(2))
             XCTAssertEqual(objects.count, UInt(2))
             updateComplete.fulfill()
         }

@@ -439,6 +439,137 @@ class ObjectTests: TestCase {
         XCTAssertEqual(data, object.dataCol)
         XCTAssertEqual(42, object.numCol)
     }
+
+    func testDeleteObservedObject() {
+        let realm = try! Realm()
+        realm.beginWrite()
+        let object = realm.create(SwiftIntObject.self, value: [0])
+        try! realm.commitWrite()
+
+        let exp = expectation(description: "")
+        let token = object.addNotificationBlock { change in
+            if case .deleted = change { }
+            else {
+                XCTFail("expected .deleted, got \(change)")
+            }
+            exp.fulfill()
+        }
+
+        realm.beginWrite()
+        realm.delete(object)
+        try! realm.commitWrite()
+
+        waitForExpectations(timeout: 2)
+        token.stop()
+    }
+
+    func expectChange<T: Equatable, U: Equatable>(_ name: String, _ old: T?, _ new: U?) -> ((ObjectChange) -> Void) {
+        let exp = expectation(description: "")
+        return { change in
+            if case .change(let properties) = change {
+                XCTAssertEqual(properties.count, 1)
+                if let prop = properties.first {
+                    XCTAssertEqual(prop.name, name)
+                    XCTAssertEqual(prop.oldValue as? T, old)
+                    XCTAssertEqual(prop.newValue as? U, new)
+                }
+            }
+            else {
+                XCTFail("expected .change, got \(change)")
+            }
+            exp.fulfill()
+        }
+    }
+
+    func testModifyObservedObjectLocally() {
+        let realm = try! Realm()
+        realm.beginWrite()
+        let object = realm.create(SwiftIntObject.self, value: [1])
+        try! realm.commitWrite()
+
+        let token = object.addNotificationBlock(expectChange("intCol", Int?.none, 2))
+        try! realm.write {
+            object.intCol = 2;
+        }
+
+        waitForExpectations(timeout: 2)
+        token.stop()
+    }
+
+    func testModifyObservedObjectRemotely() {
+        let realm = try! Realm()
+        realm.beginWrite()
+        let object = realm.create(SwiftIntObject.self, value: [1])
+        try! realm.commitWrite()
+
+        let token = object.addNotificationBlock(expectChange("intCol", 1, 2))
+        dispatchSyncNewThread {
+            let realm = try! Realm()
+            try! realm.write {
+                realm.objects(SwiftIntObject.self).first!.intCol = 2
+            }
+        }
+
+        waitForExpectations(timeout: 2)
+        token.stop()
+    }
+
+    func testListPropertyNotifications() {
+        let realm = try! Realm()
+        realm.beginWrite()
+        let object = realm.create(SwiftRecursiveObject.self, value: [[]])
+        try! realm.commitWrite()
+
+        let token = object.addNotificationBlock(expectChange("objects", Int?.none, Int?.none))
+        dispatchSyncNewThread {
+            let realm = try! Realm()
+            try! realm.write {
+                let obj = realm.objects(SwiftRecursiveObject.self).first!
+                obj.objects.append(obj)
+            }
+        }
+
+        waitForExpectations(timeout: 2)
+        token.stop()
+    }
+
+    func testOptionalPropertyNotifications() {
+        let realm = try! Realm()
+        let object = SwiftOptionalDefaultValuesObject()
+        try! realm.write {
+            realm.add(object)
+        }
+
+        var token = object.addNotificationBlock(expectChange("optIntCol", 1, 2))
+        dispatchSyncNewThread {
+            let realm = try! Realm()
+            try! realm.write {
+                realm.objects(SwiftOptionalDefaultValuesObject.self).first!.optIntCol.value = 2
+            }
+        }
+        waitForExpectations(timeout: 2)
+        token.stop()
+
+        token = object.addNotificationBlock(expectChange("optIntCol", 2, Int?.none))
+        dispatchSyncNewThread {
+            let realm = try! Realm()
+            try! realm.write {
+                realm.objects(SwiftOptionalDefaultValuesObject.self).first!.optIntCol.value = nil
+            }
+        }
+        waitForExpectations(timeout: 2)
+        token.stop()
+
+        token = object.addNotificationBlock(expectChange("optIntCol", Int?.none, 3))
+        dispatchSyncNewThread {
+            let realm = try! Realm()
+            try! realm.write {
+                realm.objects(SwiftOptionalDefaultValuesObject.self).first!.optIntCol.value = 3
+            }
+        }
+        waitForExpectations(timeout: 2)
+        token.stop()
+    }
 }
 
 #else
@@ -835,6 +966,137 @@ class ObjectTests: TestCase {
         XCTAssertEqual(dynamicArray[1], str2)
         XCTAssertEqual(arrayObject.dynamicList("intArray").count, 0)
         assertThrows(arrayObject.dynamicList("noSuchList"))
+    }
+
+    func testDeleteObservedObject() {
+        let realm = try! Realm()
+        realm.beginWrite()
+        let object = realm.create(SwiftIntObject.self, value: [0])
+        try! realm.commitWrite()
+
+        let exp = expectationWithDescription("")
+        let token = object.addNotificationBlock { change in
+            if case .Deleted = change { }
+            else {
+                XCTFail("expected .Deleted, got \(change)")
+            }
+            exp.fulfill()
+        }
+
+        realm.beginWrite()
+        realm.delete(object)
+        try! realm.commitWrite()
+
+        waitForExpectationsWithTimeout(2, handler: nil)
+        token.stop()
+    }
+
+    func expectChange<T: Equatable, U: Equatable>(name: String, _ old: T?, _ new: U?) -> ((ObjectChange) -> Void) {
+        let exp = expectationWithDescription("")
+        return { change in
+            if case .Change(let properties) = change {
+                XCTAssertEqual(properties.count, 1)
+                if let prop = properties.first {
+                    XCTAssertEqual(prop.name, name)
+                    XCTAssertEqual(prop.oldValue as? T, old)
+                    XCTAssertEqual(prop.newValue as? U, new)
+                }
+            }
+            else {
+                XCTFail("expected .Change, got \(change)")
+            }
+            exp.fulfill()
+        }
+    }
+
+    func testModifyObservedObjectLocally() {
+        let realm = try! Realm()
+        realm.beginWrite()
+        let object = realm.create(SwiftIntObject.self, value: [1])
+        try! realm.commitWrite()
+
+        let token = object.addNotificationBlock(expectChange("intCol", nil as Int?, 2))
+        try! realm.write {
+            object.intCol = 2;
+        }
+
+        waitForExpectationsWithTimeout(2, handler: nil)
+        token.stop()
+    }
+
+    func testModifyObservedObjectRemotely() {
+        let realm = try! Realm()
+        realm.beginWrite()
+        let object = realm.create(SwiftIntObject.self, value: [1])
+        try! realm.commitWrite()
+
+        let token = object.addNotificationBlock(expectChange("intCol", 1, 2))
+        dispatchSyncNewThread {
+            let realm = try! Realm()
+            try! realm.write {
+                realm.objects(SwiftIntObject.self).first!.intCol = 2
+            }
+        }
+
+        waitForExpectationsWithTimeout(2, handler: nil)
+        token.stop()
+    }
+
+    func testListPropertyNotifications() {
+        let realm = try! Realm()
+        realm.beginWrite()
+        let object = realm.create(SwiftRecursiveObject.self, value: [[]])
+        try! realm.commitWrite()
+
+        let token = object.addNotificationBlock(expectChange("objects", nil as Int?, nil as Int?))
+        dispatchSyncNewThread {
+            let realm = try! Realm()
+            try! realm.write {
+                let obj = realm.objects(SwiftRecursiveObject.self).first!
+                obj.objects.append(obj)
+            }
+        }
+
+        waitForExpectationsWithTimeout(2, handler: nil)
+        token.stop()
+    }
+
+    func testOptionalPropertyNotifications() {
+        let realm = try! Realm()
+        let object = SwiftOptionalDefaultValuesObject()
+        try! realm.write {
+            realm.add(object)
+        }
+
+        var token = object.addNotificationBlock(expectChange("optIntCol", 1, 2))
+        dispatchSyncNewThread {
+            let realm = try! Realm()
+            try! realm.write {
+                realm.objects(SwiftOptionalDefaultValuesObject.self).first!.optIntCol.value = 2
+            }
+        }
+        waitForExpectationsWithTimeout(2, handler: nil)
+        token.stop()
+
+        token = object.addNotificationBlock(expectChange("optIntCol", 2, nil as Int?))
+        dispatchSyncNewThread {
+            let realm = try! Realm()
+            try! realm.write {
+                realm.objects(SwiftOptionalDefaultValuesObject.self).first!.optIntCol.value = nil
+            }
+        }
+        waitForExpectationsWithTimeout(2, handler: nil)
+        token.stop()
+
+        token = object.addNotificationBlock(expectChange("optIntCol", nil as Int?, 3))
+        dispatchSyncNewThread {
+            let realm = try! Realm()
+            try! realm.write {
+                realm.objects(SwiftOptionalDefaultValuesObject.self).first!.optIntCol.value = 3
+            }
+        }
+        waitForExpectationsWithTimeout(2, handler: nil)
+        token.stop()
     }
 }
 
