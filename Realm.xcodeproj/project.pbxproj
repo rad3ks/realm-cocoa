@@ -161,6 +161,12 @@
 		1AFEF8421D52CD8F00495005 /* RLMRealmConfiguration+Sync.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ABF256D1D52AB6200BAC441 /* RLMRealmConfiguration+Sync.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1AFEF8431D52D2C900495005 /* Sync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A7DE7021D38460B0029F0AE /* Sync.swift */; };
 		2973CCF91C175AB400FEA0FA /* fileformat-pre-null.realm in Resources */ = {isa = PBXBuildFile; fileRef = 29B7FDF71C0DE76B0023224E /* fileformat-pre-null.realm */; };
+		297C18131E30FB110016078E /* RLMSyncPermissionChange_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = E8C6EAEF1DD65B8C00EC1A03 /* RLMSyncPermissionChange_Private.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		297C18141E30FB110016078E /* RLMSyncPermissionOffer_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 140CFE971DFABF5E006FB011 /* RLMSyncPermissionOffer_Private.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		297C18151E30FB110016078E /* RLMSyncPermissionOfferResponse_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 140CFE9A1DFABF5E006FB011 /* RLMSyncPermissionOfferResponse_Private.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		297C18161E30FB120016078E /* RLMSyncPermissionChange_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = E8C6EAEF1DD65B8C00EC1A03 /* RLMSyncPermissionChange_Private.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		297C18171E30FB120016078E /* RLMSyncPermissionOffer_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 140CFE971DFABF5E006FB011 /* RLMSyncPermissionOffer_Private.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		297C18181E30FB120016078E /* RLMSyncPermissionOfferResponse_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 140CFE9A1DFABF5E006FB011 /* RLMSyncPermissionOfferResponse_Private.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		297FBEFB1C19F696009D1118 /* RLMTestCaseUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 297FBEFA1C19F696009D1118 /* RLMTestCaseUtils.swift */; };
 		297FBEFF1C19F844009D1118 /* TestUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = 297FBEFE1C19F844009D1118 /* TestUtils.mm */; };
 		29B7FDF61C0DA6560023224E /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29B7FDF51C0DA6560023224E /* Error.swift */; };
@@ -1585,6 +1591,7 @@
 				1A7AFA7D1E29B7F4002744FA /* object_notifier.hpp in Headers */,
 				5D02C7931E2E873F0048C13E /* time.hpp in Headers */,
 				5D274C501D6D16A8006FEBB1 /* event_loop_signal.hpp in Headers */,
+				297C18131E30FB110016078E /* RLMSyncPermissionChange_Private.h in Headers */,
 				5D659EA01BE04556006515A0 /* external_commit_helper.hpp in Headers */,
 				5D02C78F1E2E871F0048C13E /* object_accessor.hpp in Headers */,
 				1A7AFA741E29B756002744FA /* object.hpp in Headers */,
@@ -1609,6 +1616,7 @@
 				5D659EA91BE04556006515A0 /* RLMArray.h in Headers */,
 				5D659EAA1BE04556006515A0 /* RLMArray_Private.h in Headers */,
 				3F9863BD1D36876B00641C98 /* RLMClassInfo.hpp in Headers */,
+				297C18141E30FB110016078E /* RLMSyncPermissionOffer_Private.h in Headers */,
 				5D659EAB1BE04556006515A0 /* RLMCollection.h in Headers */,
 				5D659EAC1BE04556006515A0 /* RLMConstants.h in Headers */,
 				5D659EAE1BE04556006515A0 /* RLMListBase.h in Headers */,
@@ -1618,6 +1626,7 @@
 				5D02C78E1E2E871F0048C13E /* execution_context_id.hpp in Headers */,
 				5D659EB21BE04556006515A0 /* RLMObject_Private.h in Headers */,
 				5D659EB31BE04556006515A0 /* RLMObjectBase.h in Headers */,
+				297C18151E30FB110016078E /* RLMSyncPermissionOfferResponse_Private.h in Headers */,
 				5D659EB41BE04556006515A0 /* RLMObjectBase_Dynamic.h in Headers */,
 				5D659EB51BE04556006515A0 /* RLMObjectSchema.h in Headers */,
 				D41ABB831D80DC010031D38C /* RLMThreadSafeReference.h in Headers */,
@@ -1692,12 +1701,14 @@
 				5DD755A61BE056DE002800DA /* RLMAnalytics.hpp in Headers */,
 				1A7AFA7F1E29B7FA002744FA /* object_notifier.hpp in Headers */,
 				1A81EDED1E3087410035F4E6 /* NSError+RLMSync.h in Headers */,
+				297C18181E30FB120016078E /* RLMSyncPermissionOfferResponse_Private.h in Headers */,
 				5DD755A71BE056DE002800DA /* RLMArray.h in Headers */,
 				5DD755A81BE056DE002800DA /* RLMArray_Private.h in Headers */,
 				E8C6EAF41DD66C0C00EC1A03 /* RLMSyncUtil_Private.h in Headers */,
 				1A15366A1DB045D800C0EC93 /* sync_user.hpp in Headers */,
 				3F9863BE1D36876B00641C98 /* RLMClassInfo.hpp in Headers */,
 				5DD755A91BE056DE002800DA /* RLMCollection.h in Headers */,
+				297C18171E30FB120016078E /* RLMSyncPermissionOffer_Private.h in Headers */,
 				5DD755AA1BE056DE002800DA /* RLMConstants.h in Headers */,
 				5DD755AC1BE056DE002800DA /* RLMListBase.h in Headers */,
 				1A7AFA761E29B75C002744FA /* object.hpp in Headers */,
@@ -1739,6 +1750,7 @@
 				5DD755C61BE056DE002800DA /* RLMSchema_Private.h in Headers */,
 				5DD755C71BE056DE002800DA /* RLMSwiftSupport.h in Headers */,
 				1A0512761D8746CD00806AEC /* RLMSyncConfiguration.h in Headers */,
+				297C18161E30FB120016078E /* RLMSyncPermissionChange_Private.h in Headers */,
 				3F336E8A1DA2FA14006CB5A0 /* RLMSyncConfiguration_Private.h in Headers */,
 				1AAF4D231D665B2A00058FAD /* RLMSyncCredentials.h in Headers */,
 				1A7DE7071D38474F0029F0AE /* RLMSyncManager.h in Headers */,
