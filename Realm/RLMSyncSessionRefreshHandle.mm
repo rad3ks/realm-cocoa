@@ -46,21 +46,28 @@ using namespace realm;
     if (self = [super init]) {
         self.pathToRealm = path;
         self.user = user;
-        _session = session;
+        _session = std::move(session);
         return self;
     }
     return nil;
 }
 
-- (void)invalidate {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.timer invalidate];
-        self.user = nil;
-    });
+- (void)dealloc {
+    [self.timer invalidate];
 }
 
-- (void)scheduleRefreshTimer:(NSTimeInterval)fireTime {
-    constexpr NSInteger REFRESH_BUFFER = 10;
+- (void)invalidate {
+    [self.timer invalidate];
+}
+
++ (NSDate *)fireDateForTokenExpirationDate:(NSDate *)date {
+    static NSTimeInterval refreshBuffer = 10;
+    NSDate *fireDate = [date dateByAddingTimeInterval:-refreshBuffer];
+    // Only fire times in the future are valid.
+    return ([fireDate compare:[NSDate date]] != NSOrderedDescending ? fireDate : nil);
+}
+
+- (void)scheduleRefreshTimer:(NSDate *)dateWhenTokenExpires {
     // Schedule the timer on the main queue.
     // It's very likely that this method will be run on a side thread, for example
     // on the thread that runs `NSURLSession`'s completion blocks. We can't be
@@ -68,15 +75,13 @@ using namespace realm;
     // to create and start a new one if one doesn't already exist.
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.timer invalidate];
-        // The fire time is `REFRESH_BUFFER` seconds before the token expires, but it also
-        // must be at least `REFRESH_BUFFER` seconds in the future from now.
-        NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
-        NSTimeInterval actualTime = fireTime - REFRESH_BUFFER;
-        if (actualTime <= now + REFRESH_BUFFER) {
+        // The fire time is `self.refreshBuffer` seconds before the token expires.
+        NSDate *fireDate = [RLMSyncSessionRefreshHandle fireDateForTokenExpirationDate:dateWhenTokenExpires];
+        if (!fireDate) {
             [self.user _unregisterRefreshHandleForURLPath:self.pathToRealm];
             return;
         }
-        NSTimer *t = [[NSTimer alloc] initWithFireDate:[NSDate dateWithTimeIntervalSince1970:actualTime]
+        NSTimer *t = [[NSTimer alloc] initWithFireDate:fireDate
                                               interval:0
                                                 target:self
                                               selector:@selector(timerFired:)
@@ -126,7 +131,8 @@ using namespace realm;
             if (auto session = _session.lock()) {
                 if (session->state() != SyncSession::PublicState::Error) {
                     session->refresh_access_token([model.accessToken.token UTF8String], none);
-                    [self scheduleRefreshTimer:model.accessToken.tokenData.expires];
+                    NSDate *expiration = [NSDate dateWithTimeIntervalSince1970:model.accessToken.tokenData.expires];
+                    [self scheduleRefreshTimer:expiration];
                     return;
                 }
             }
@@ -141,13 +147,13 @@ using namespace realm;
                                                  code:RLMSyncErrorBadResponse
                                              userInfo:@{kRLMSyncUnderlyingErrorKey: error}];
         [[RLMSyncManager sharedManager] _fireError:syncError];
-        NSTimeInterval nextFireDate = 0;
+        NSDate *nextFireDate = nil;
         // Certain errors should trigger a retry.
         if (error.domain == NSURLErrorDomain) {
             switch (error.code) {
                 case NSURLErrorCannotConnectToHost:
                     // FIXME: 120 seconds is an arbitrarily chosen value, consider rationalizing it.
-                    nextFireDate = [[NSDate dateWithTimeIntervalSinceNow:120] timeIntervalSince1970];
+                    nextFireDate = [NSDate dateWithTimeIntervalSinceNow:120];
                     break;
                 case NSURLErrorNotConnectedToInternet:
                 case NSURLErrorNetworkConnectionLost:
@@ -155,12 +161,12 @@ using namespace realm;
                 case NSURLErrorDNSLookupFailed:
                 case NSURLErrorCannotFindHost:
                     // FIXME: 30 seconds is an arbitrarily chosen value, consider rationalizing it.
-                    nextFireDate = [[NSDate dateWithTimeIntervalSinceNow:30] timeIntervalSince1970];
+                    nextFireDate = [NSDate dateWithTimeIntervalSinceNow:30];
                     break;
                 default:
                     break;
             }
-            if (nextFireDate > 0) {
+            if (nextFireDate) {
                 [self scheduleRefreshTimer:nextFireDate];
             } else {
                 [user _unregisterRefreshHandleForURLPath:self.pathToRealm];

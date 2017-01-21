@@ -234,7 +234,8 @@ using namespace realm;
                                                                                session:session];
                 [self.refreshHandles[resolvedURLString] invalidate];
                 self.refreshHandles[resolvedURLString] = handle;
-                [handle scheduleRefreshTimer:model.accessToken.tokenData.expires];
+                NSDate *expires = [NSDate dateWithTimeIntervalSince1970:model.accessToken.tokenData.expires];
+                [handle scheduleRefreshTimer:expires];
             }
             if (completion) {
                 completion(success ? nil : [NSError errorWithDomain:RLMSyncErrorDomain

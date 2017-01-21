@@ -34,7 +34,7 @@ class SyncSession;
                                user:(RLMSyncUser *)user
                             session:(std::shared_ptr<realm::SyncSession>)session;
 
-- (void)scheduleRefreshTimer:(NSTimeInterval)fireTime;
+- (void)scheduleRefreshTimer:(NSDate *)dateWhenTokenExpires;
 - (void)invalidate;
 
 @end
