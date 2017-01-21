@@ -136,7 +136,8 @@
 
     __block XCTestExpectation *ex;
     [RLMSyncSessionRefreshHandle rlmTestUtils_calculateFireDateUsingTestLogic:YES
-                                                     blockOnRefreshCompletion:^{
+                                                     blockOnRefreshCompletion:^(BOOL success) {
+                                                         XCTAssertTrue(success);
                                                          refreshCount++;
                                                          [ex fulfill];
                                                      }];

@@ -92,10 +92,10 @@ using namespace realm;
     });
 }
 
-- (void)onRefreshCompletionWithError:(NSError *)error json:(NSDictionary *)json {
+- (BOOL)onRefreshCompletionWithError:(NSError *)error json:(NSDictionary *)json {
     RLMSyncUser *user = self.user;
     if (!user) {
-        return;
+        return NO;
     }
     if (json && !error) {
         RLMAuthResponseModel *model = [[RLMAuthResponseModel alloc] initWithDictionary:json
@@ -109,7 +109,7 @@ using namespace realm;
             [user _unregisterRefreshHandleForURLPath:self.pathToRealm];
             [self.timer invalidate];
             [[RLMSyncManager sharedManager] _fireError:error];
-            return;
+            return NO;
         }
 
         // Success
@@ -118,13 +118,13 @@ using namespace realm;
                 session->refresh_access_token([model.accessToken.token UTF8String], none);
                 NSDate *expiration = [NSDate dateWithTimeIntervalSince1970:model.accessToken.tokenData.expires];
                 [self scheduleRefreshTimer:expiration];
-                return;
+                return YES;
             }
         }
         // The session is dead or in a fatal error state.
         [user _unregisterRefreshHandleForURLPath:self.pathToRealm];
         [self.timer invalidate];
-        return;
+        return NO;
     }
 
     // Something else went wrong
@@ -158,6 +158,7 @@ using namespace realm;
             [self.timer invalidate];
         }
     }
+    return NO;
 }
 
 - (void)timerFired:(__unused NSTimer *)timer {

@@ -21,17 +21,17 @@
 #import "RLMTestUtils.h"
 
 static BOOL s_calculateFireDatesWithTestLogic = NO;
-static void(^s_onRefreshCompletedOrErrored)(void) = nil;
+static void(^s_onRefreshCompletedOrErrored)(BOOL) = nil;
 
 @interface RLMSyncSessionRefreshHandle ()
 + (NSDate *)fireDateForTokenExpirationDate:(NSDate *)date;
-- (void)onRefreshCompletionWithError:(NSError *)error json:(NSDictionary *)json;
+- (BOOL)onRefreshCompletionWithError:(NSError *)error json:(NSDictionary *)json;
 @end
 
 @implementation RLMSyncSessionRefreshHandle (ObjectServerTests)
 
 + (void)rlmTestUtils_calculateFireDateUsingTestLogic:(BOOL)forTest
-                            blockOnRefreshCompletion:(void(^)(void))block {
+                            blockOnRefreshCompletion:(void(^)(BOOL))block {
     s_onRefreshCompletedOrErrored = block;
     s_calculateFireDatesWithTestLogic = forTest;
 }
@@ -55,12 +55,13 @@ static void(^s_onRefreshCompletedOrErrored)(void) = nil;
     }
 }
 
-- (void)ost_onRefreshCompletionWithError:(NSError *)error json:(NSDictionary *)json {
-    [self ost_onRefreshCompletionWithError:error json:json];
+- (BOOL)ost_onRefreshCompletionWithError:(NSError *)error json:(NSDictionary *)json {
+    BOOL status = [self ost_onRefreshCompletionWithError:error json:json];
     // For the sake of testing, call a callback afterwards to let the test update its state.
     if (s_onRefreshCompletedOrErrored) {
-        s_onRefreshCompletedOrErrored();
+        s_onRefreshCompletedOrErrored(status);
     }
+    return status;
 }
 
 @end
