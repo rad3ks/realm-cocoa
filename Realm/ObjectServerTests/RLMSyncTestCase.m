@@ -22,6 +22,7 @@
 #import <Realm/Realm.h>
 
 #import "RLMSyncManager+ObjectServerTests.h"
+#import "RLMSyncSessionRefreshHandle+ObjectServerTests.h"
 
 #if !TARGET_OS_MAC
 #error These tests can only be run on a macOS host.
@@ -265,6 +266,9 @@ static NSURL *syncDirectoryForChildProcess() {
 - (void)tearDown {
     [s_managerForTest prepareForDestruction];
     s_managerForTest = nil;
+    [RLMSyncSessionRefreshHandle rlmTestUtils_calculateFireDateUsingTestLogic:NO
+                                                     blockOnRefreshCompletion:nil];
+
     [super tearDown];
 }
 

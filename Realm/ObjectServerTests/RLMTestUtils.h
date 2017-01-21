@@ -16,21 +16,5 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#import "RLMSyncSessionRefreshHandle.h"
-
-#import <memory>
-
-namespace realm {
-class SyncSession;
-}
-
-@class RLMSyncUser;
-
-/// An object that handles refreshing a session's auth token periodically, as long as that session remains viable.
-/// Intended for easy removal once the new auth system is in place.
-@interface RLMSyncSessionRefreshHandle ()
-
-- (instancetype)initWithPathToRealm:(NSString *)path
-                               user:(RLMSyncUser *)user
-                            session:(std::shared_ptr<realm::SyncSession>)session;
-@end
+void rlmTestUtils_swapOutClassMethod(id classObject, SEL original, SEL swizzled);
+void rlmTestUtils_swapOutInstanceMethod(id classObject, SEL original, SEL swizzled);

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// Copyright 2016 Realm Inc.
+// Copyright 2017 Realm Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,19 +18,9 @@
 
 #import "RLMSyncSessionRefreshHandle.h"
 
-#import <memory>
+@interface RLMSyncSessionRefreshHandle (ObjectServerTests)
 
-namespace realm {
-class SyncSession;
-}
++ (void)rlmTestUtils_calculateFireDateUsingTestLogic:(BOOL)forTest
+                            blockOnRefreshCompletion:(void(^)(void))block;
 
-@class RLMSyncUser;
-
-/// An object that handles refreshing a session's auth token periodically, as long as that session remains viable.
-/// Intended for easy removal once the new auth system is in place.
-@interface RLMSyncSessionRefreshHandle ()
-
-- (instancetype)initWithPathToRealm:(NSString *)path
-                               user:(RLMSyncUser *)user
-                            session:(std::shared_ptr<realm::SyncSession>)session;
 @end
